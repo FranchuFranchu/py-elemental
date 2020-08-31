@@ -1,0 +1,59 @@
+
+html, body, main {
+    height: 100%;
+    width: 100%;
+}
+main {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 1px 1px;
+  grid-template-areas: "current-owned-elements latest-elements recommended-elements" "combine-menu latest-elements recommended-elements";
+}
+
+.current-owned-elements { 
+    grid-area: current-owned-elements; 
+    overflow-y: scroll;
+    height: 100%;
+}
+
+.latest-elements { grid-area: latest-elements; }
+
+.combine-menu { grid-area: combine-menu; }
+
+.recommended-elements { grid-area: recommended-elements; }
+
+.element-creation-menu { 
+    position: fixed;
+    top: 10%;
+    left: 10%;
+    width: 80%;
+    height: 80%;
+    background-color: white;
+    border: 1px solid black;
+    border-radius: 5px;
+    display: grid;
+    overflow-y: scroll;
+}
+
+.element-creation-container {
+    padding: 5%;
+    padding-top: 0;
+}
+
+.element-creation-menu h2 { 
+    text-align: center;
+}
+.element-creation-menu .grid { 
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-row-gap: 10px;
+}
+.element-creation-menu canvas { 
+    margin-left: 50%;
+    transform: translate(-50%,0%);
+}
+.element-creation-menu button { 
+    margin-left: 50%;
+    transform: translate(-50%,0%);
+}
