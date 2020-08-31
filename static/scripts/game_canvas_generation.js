@@ -83,27 +83,36 @@ Game.funcs.draw_filling_text = function(ctx, canvas, text) {
     let curr_line = ""
     let lines = []
 
+    var text_height;
+
     for (var i = 0; i < text.split(' ').length; i++) {
         let word = text.split(' ')[i]
 
         curr_line += word
-        let text_height = Math.round((canvas.width / ctx.measureText(curr_line).width) * 0.7)
+        text_height = Math.round((canvas.width / ctx.measureText(curr_line).width) * 0.7)
 
-        if (text_height < 10) {
+        if (text_height < 15) {
             lines.push([text_height, curr_line])
             curr_line = ""
             continue
+        } else {
         }
+
+        console.log(text_height)
 
         curr_line += " "
     }
-
+    lines.push([text_height, curr_line])
     for (var i = 0; i < lines.length; i++) {
         let size = lines[i][0]
         let textl = lines[i][1]
         ctx.font = size + "px sans-serif" 
+        size *= 0.9
+        size = Math.round(size)
         console.log(size)
-        ctx.fillText(textl, canvas.width / 2, canvas.height / 2 + i * size)
+        ctx.textBaseline = 'middle'
+        ctx.textAlign = 'center'
+        ctx.fillText(textl, canvas.width / 2, canvas.height / 2 + (-Math.floor((lines.length - 1) / 2) + i) * 13)
     }    
 
 }
@@ -121,8 +130,6 @@ Game.funcs.generate_element_canvas = function(canvas, element) {
     ctx.fillStyle = bg_colors[0]
     console.log(ctx.fillStyle)
 
-    ctx.textBaseline = 'middle'
-    ctx.textAlign = 'center'
 
     ctx.globalCompositeOperation = "source-over";
     Game.funcs.draw_rounded_rectangle(ctx, 5, 5, canvas.width - 10, canvas.height - 10, 5, true, false)

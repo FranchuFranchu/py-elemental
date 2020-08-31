@@ -13,6 +13,15 @@ Game.funcs.creation_setup = function() {
         })
     })
 
+    $("button.create-button").on("click", () => {
+
+    })
+
+    $("button.cancel-button").on("click", () => {
+        $(".element-creation-menu").hide()
+        
+    })
+
     let str_attrs = ["fg-pattern", "bg-pattern", "name"]
 
     for (let i = 0; i < str_attrs.length; i++) {
