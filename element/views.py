@@ -1,8 +1,9 @@
 from django.shortcuts import render
 from dwebsocket.decorators import accept_websocket
+from django.db.models import Count, F, Value
 from django.core import serializers
 import threading
-from .models import Element
+from .models import Element, NewElementSuggestion
 import json
 
 
@@ -35,9 +36,12 @@ def main_socket(request):
                     for arg in args:
                         if not arg.strip():
                             continue
-                        if int(arg) == 0:
+                        if arg == "0":
                             continue
-                        elements.append(Element.objects.filter(sequential_number=int(arg)).first())
+                        item = Element.objects.filter(password=arg).first()
+
+                        if item:
+                            elements.append(item)
 
 
                     if len(elements) < 2:
@@ -63,8 +67,46 @@ def main_socket(request):
                         s = serializers.serialize('json', [list(recipes)[0]])
                         request.websocket.send(f'discover_element {s}')
 
+                elif action == "new_element_suggestion":
+                    d = json.loads(' '.join(args))
 
+                    d["ingredients"] = filter(lambda i: i, d["ingredients"])
 
+                    e = NewElementSuggestion.objects.create(**d["element"]["fields"])
+                    e.ingredients.set(d["ingredients"])
+
+                    e.save()
+                    print(e)
+
+                elif action == "get_vote_pending":
+                    sort = args[0]
+
+                    if sort == "latest":
+                        for i in NewElementSuggestion.objects.order_by(F("create_date").asc()):
+                            s = serializers.serialize('json', [i])
+                            request.websocket.send(f"element_suggestion_vote {sort} {s}")
+
+                elif action == "query_name":
+
+                    d = json.loads(' '.join(args))
+
+                    assert type(d) == str
+
+                    matches = [i.name for i in Element.objects.filter(name__contains=d)[0:20]]
+
+                    request.websocket.send(f"element_autocomplete_list {json.dumps(matches)}")
+
+                elif action == "upvote":
+                    print("test")
+                    NewElementSuggestion.objects.filter(pk=int(args[0])).first().upvote()
+                    for i in clients:
+                        i.send("upvote " + args[0])
+
+                elif action == "downvote":
+                    NewElementSuggestion.objects.filter(pk=int(args[0])).first().downvote()
+                    for i in clients:
+                        i.send("downvote " + args[0])
+                print(action, args)
         finally:
             clients.remove(request.websocket)
             lock.release()

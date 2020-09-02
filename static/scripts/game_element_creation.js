@@ -1,25 +1,29 @@
 Game.funcs.creation_setup = function() {
     $(".bg-pattern").each((idx, e) => {
         Game.bg_patterns.forEach((i, jdx) => {
-            console.log(i)
             $(e).append($("<option/>").text(i))
         })
     })
-    console.log($(".bg-pattern"))
     $(".fg-pattern").each((idx, e) => {
         Game.fg_patterns.forEach((i, jdx) => {
-            console.log(i)
             $(e).append($("<option/>").text(i))
         })
     })
 
     $("button.create-button").on("click", () => {
-
+        Game.socket.send("new_element_suggestion "+ JSON.stringify({
+            "element": Game.creating_element,
+            "ingredients": Game.funcs.get_current_ingredients(),
+        }))
     })
 
     $("button.cancel-button").on("click", () => {
         $(".element-creation-menu").hide()
-        
+    })
+
+    $(".element-creation-menu .name").on("input", (ev) => {
+        console.log(JSON.stringify(ev.target.value))
+        Game.socket.send("query_name " + JSON.stringify(ev.target.value))
     })
 
     let str_attrs = ["fg-pattern", "bg-pattern", "name"]
@@ -31,7 +35,6 @@ Game.funcs.creation_setup = function() {
             Game.funcs.generate_element_canvas($(".element-creation-menu canvas")[0], Game.creating_element)
         })
         Game.creating_element.fields[attr.replace('-', '_')] = $(".element-creation-menu ." + attr).val()
-        console.log($(".element-creation-menu ." + attr).val())
 
     }
 
@@ -45,7 +48,6 @@ Game.funcs.creation_setup = function() {
                 let original_colors = Game.creating_element.fields[attr.replace("-", "_") + "s"]
 
                 let colstart = (j-1)*8
-                console.log(original_colors)
                 Game.creating_element.fields[attr.replace("-", "_") + "s"] = original_colors.replace_at(colstart, element.jscolor.toHEXString())
                 Game.funcs.generate_element_canvas($(".element-creation-menu canvas")[0], Game.creating_element)
             })

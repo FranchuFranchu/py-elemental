@@ -9,7 +9,17 @@
               integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0="
               crossorigin="anonymous"></script>
 
+    <script
+              src="https://code.jquery.com/ui/1.12.0/jquery-ui.min.js"
+              integrity="sha256-eGE6blurk5sHj+rmkfsGYeKyZx3M4bG+ZlFyA7Kns7E="
+              crossorigin="anonymous"></script>
+        
+    <!-- ColorPicker -->
     <script type="text/javascript" src="/static/scripts/lib_color_picker.js"></script>
+
+
+    <!-- ColorPicker -->
+    <script type="text/javascript" src="/static/scripts/lib_datalist.js"></script>
 
     <!-- Game scripts -->
     <script type="text/javascript" src="/static/scripts/game_initialize.js"></script>
@@ -18,58 +28,85 @@
     <script type="text/javascript" src="/static/scripts/game_combination.js"></script>
     <script type="text/javascript" src="/static/scripts/game_drag_drop.js"></script>
     <script type="text/javascript" src="/static/scripts/game_element_creation.js"></script>
+    <script type="text/javascript" src="/static/scripts/game_element_list.js"></script>
     <script type="text/javascript" src="/static/scripts/game_ready.js"></script>
     <script type="text/javascript" src="/static/scripts/game_socket.js"></script>
+    <script type="text/javascript" src="/static/scripts/game_tabs.js"></script>
     <script type="text/javascript" src="/static/scripts/game_util.js"></script>
     <link rel="stylesheet" type="text/css" href="/static/stylesheets/game_main.css">
 </head>
 <body>
-    <main>
-        <div class="current-owned-elements">
-            <h2>Your elements</h2>
-        </div>
-        <div class="combine-menu">
-            <h2>Combine</h2>
-            <canvas class="drop-slot"></canvas>
-            <canvas class="drop-slot"></canvas>
-            <br/>
-            <button class="combine-button" onclick="Game.funcs.combine_elements()">Combine!</button>
-        </div>
-        <div class="latest-elements">
-            <h2>Latest elements</h2>
-        </div>
+    <div class="tab-list">
         
-        <div class="recommended-elements">
-            <h2>Recommended elements</h2>
+    </div>
+    <main>
+        <div class="tab elements">
+            <div class="current-owned-elements">
+                <h2>Your elements</h2>
+            </div>
+            <div class="combine-menu">
+                <h2>Combine</h2>
+                <canvas class="drop-slot"></canvas>
+                <canvas class="drop-slot"></canvas>
+                <br/>
+                <button class="combine-button" onclick="Game.funcs.combine_elements()">Combine!</button>
+            </div>
         </div>
-        <div class="element-creation-menu" style="display: block;">
-            <div class="element-creation-container">
-                <h2>Create a new element!</h2>
-                <canvas class="creation-canvas"></canvas>
-                <div class="grid">
-                    <label>Name</label>
-                    <input type="text" name="element-name" class="name" placeholder="Element name"/>
-                    <label>Foreground style</label>
-                    <select class="fg-pattern"></select>
-                    <label>Background style</label>
-                    <select class="bg-pattern"></select>
-                    <label>Foreground color 1</label>
-                    <input value="rgba(40,170,255,1)" data-jscolor="" class="fg-color-1">
-                    <label>Foreground color 2</label>
-                    <input value="rgba(40,170,255,1)" data-jscolor="" class="fg-color-2">
-                    <label>Background color 1</label>
-                    <input value="rgba(40,170,255,1)" data-jscolor="{alphaChannel: false}" class="bg-color-1">
-                    <label>Background color 2</label>
-                    <input value="rgba(40,170,255,1)" data-jscolor="{alphaChannel: false}" class="bg-color-2">
+        <div class="tab latest-vote">
+            <div class="latest-elements" >
+                <h2>Latest elements</h2>
+                <div class="vote-list-latest">
                 </div>
-                <br/>
-                <button class="create-button">Create!</button>
-                <br/>
-                <br/>
-                <button class="cancel-button">Cancel</button>
+            </div>
+        </div>
+        <div class="tab element-suggestion">
+            <div class="element-creation-menu">
+                <div class="element-creation-container">
+                    <h2>Create a new element!</h2>
+                    <canvas class="creation-canvas"></canvas>
+                    <datalist class="name-list" id="name-list">
+                    </datalist>
+                    <div class="grid">
+                        <label>Name</label>
+                        <input type="text" name="element-name" class="name" placeholder="Element name" list="name-list"/>
+                        <label>Foreground style</label>
+                        <select class="fg-pattern"></select>
+                        <label>Background style</label>
+                        <select class="bg-pattern"></select>
+                        <label>Foreground color 1</label>
+                        <input value="rgba(40,170,255,1)" data-jscolor="" class="fg-color-1">
+                        <label>Foreground color 2</label>
+                        <input value="rgba(40,170,255,1)" data-jscolor="" class="fg-color-2">
+                        <label>Background color 1</label>
+                        <input value="rgba(40,170,255,1)" data-jscolor="{alphaChannel: false}" class="bg-color-1">
+                        <label>Background color 2</label>
+                        <input value="rgba(40,170,255,1)" data-jscolor="{alphaChannel: false}" class="bg-color-2">
+                    </div>
+                    <br/>
+                    <button class="create-button">Create!</button>
+                    <br/>
+                    <br/>
+                    <button class="cancel-button">Cancel</button>
+                </div>
             </div>
         </div>
         
     </main>
+    <div style="display: none" class="templates">
+        <div class="vote-row-template">
+            <div class="up-template">
+                <button class="up-button">⬆</button>
+            </div>
+            <canvas></canvas>
+            <div class="down-template">
+                <button class="down-button">⬇</button>
+            </div>
+            <div class="voting-status">
+                <span class="current">?</span>
+                /
+                <span class="target">?</span>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

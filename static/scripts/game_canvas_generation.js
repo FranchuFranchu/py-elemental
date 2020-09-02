@@ -98,7 +98,6 @@ Game.funcs.draw_filling_text = function(ctx, canvas, text) {
         } else {
         }
 
-        console.log(text_height)
 
         curr_line += " "
     }
@@ -109,7 +108,6 @@ Game.funcs.draw_filling_text = function(ctx, canvas, text) {
         ctx.font = size + "px sans-serif" 
         size *= 0.9
         size = Math.round(size)
-        console.log(size)
         ctx.textBaseline = 'middle'
         ctx.textAlign = 'center'
         ctx.fillText(textl, canvas.width / 2, canvas.height / 2 + (-Math.floor((lines.length - 1) / 2) + i) * 13)
@@ -128,7 +126,6 @@ Game.funcs.generate_element_canvas = function(canvas, element) {
     ctx = canvas.getContext('2d')
 
     ctx.fillStyle = bg_colors[0]
-    console.log(ctx.fillStyle)
 
 
     ctx.globalCompositeOperation = "source-over";
@@ -142,7 +139,6 @@ Game.funcs.generate_element_canvas = function(canvas, element) {
 
 
 
-    console.log(element.fields)
     f = Game.BG_PATHS[element.fields.bg_pattern]
     f(ctx, canvas)
 
@@ -150,7 +146,6 @@ Game.funcs.generate_element_canvas = function(canvas, element) {
 
 
     ctx.fillStyle = fg_colors[0]
-    console.log(element.fields)
     f = Game.FG_PATHS[element.fields.fg_pattern]
     f(ctx, canvas)
 
@@ -182,11 +177,11 @@ Game.funcs.add_element = function(element) {
     canvas = $("<canvas/>")
         .attr("draggable", true)
         .attr("ondragstart", "Game.funcs.on_slot_drag_start(event)")
-        .attr("data-pk", element.pk) /* Primary key */
+        .attr("data-password", element.fields.password) /* Primary key */
 
     $(".current-owned-elements").append(
         canvas
     )
-    Game.known_elements[element.pk] = element
+    Game.known_elements[element.fields.password] = element
     Game.funcs.generate_element_canvas(canvas[0], element)
 }

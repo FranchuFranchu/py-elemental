@@ -2,26 +2,12 @@
 html, body, main {
     height: 100%;
     width: 100%;
+    margin: 0;
 }
-main {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  grid-template-rows: 1fr 1fr;
-  gap: 1px 1px;
-  grid-template-areas: "current-owned-elements latest-elements recommended-elements" "combine-menu latest-elements recommended-elements";
-}
-
 .current-owned-elements { 
-    grid-area: current-owned-elements; 
     overflow-y: scroll;
     height: 100%;
 }
-
-.latest-elements { grid-area: latest-elements; }
-
-.combine-menu { grid-area: combine-menu; }
-
-.recommended-elements { grid-area: recommended-elements; }
 
 .element-creation-menu { 
     position: fixed;
@@ -56,4 +42,34 @@ main {
 .element-creation-menu button { 
     margin-left: 50%;
     transform: translate(-50%,0%);
+}
+
+.vote-list-latest {
+    display: grid;
+    grid-template-columns: 1fr;
+}
+
+
+.vote-list-latest .vote-item {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    align-items: center;
+}
+
+.tab-list {
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    border-bottom: 1px solid blue
+}
+
+.tab-list > *{
+    flex-grow: 1;
+    flex-basis: auto;
+    height: 100%;
+    text-align: center;
+}
+
+.tab-list > *:hover{
+    background-color: grey;
 }

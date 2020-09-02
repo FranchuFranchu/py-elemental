@@ -8,8 +8,8 @@ $().ready(function() {
     for (var i = 0; i < $(".drop-slot").length; i++) {
         let canvas = $(".drop-slot")[i]
         Game.funcs.draw_slot(canvas)
-    }
 
+    }
 
     Game.funcs.creation_setup()
 })

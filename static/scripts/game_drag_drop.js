@@ -3,13 +3,12 @@ Game.funcs.on_slot_drop = function(ev) {
         .drawImage(Game.dragged, 0, 0)
 
     $(ev.target)
-        .attr("data-pk", Game.dragged.attributes["data-pk"].nodeValue)
+        .attr("data-password", Game.dragged.attributes["data-password"].nodeValue)
     Game.dragged = undefined
 }
 Game.funcs.on_dragover = function(ev) {
     ev.preventDefault()
 }
 Game.funcs.on_slot_drag_start = function(ev) {
-    console.log(ev.target)
     Game.dragged = ev.target
 }
