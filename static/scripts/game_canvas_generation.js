@@ -174,14 +174,32 @@ Game.funcs.draw_slot = function(canvas) {
     ctx.fillText("[drop]", canvas.width / 2, canvas.height / 2)
 }
 Game.funcs.add_element = function(element) {
+
+    if ($("canvas[data-pk=" + element.pk + "]").length != 0) {
+        return
+    }
+
     canvas = $("<canvas/>")
-        .attr("draggable", true)
-        .attr("ondragstart", "Game.funcs.on_slot_drag_start(event)")
-        .attr("data-password", element.fields.password) /* Primary key */
+        .attr("data-pk", element.pk)
+        .attr("data-password", element.fields.password) /* Password */
+        .on("touchstart", Game.funcs.on_element_touch)
+        .on("contextmenu", Game.funcs.on_element_contextmenu)
+
+    if (!Game.mobile) {
+        canvas
+            .attr("draggable", true)
+            .on("dragstart", Game.funcs.on_slot_drag_start)
+    } else {
+        canvas
+            .on("click", Game.funcs.on_element_touch)
+    }
+
 
     $(".current-owned-elements").append(
         canvas
     )
-    Game.known_elements[element.fields.password] = element
+    Game.known_elements[element.pk] = element.fields.password
+    Game.element_data[element.pk] = element
+    Game.funcs.save_elements()
     Game.funcs.generate_element_canvas(canvas[0], element)
 }

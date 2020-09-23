@@ -3,17 +3,20 @@ from dwebsocket.decorators import accept_websocket
 from django.db.models import Count, F, Value
 from django.core import serializers
 import threading
-from .models import Element, NewElementSuggestion
+from uuid import uuid5
+from .models import Element, Suggestion, Recipe
+import random
+import string
+from time import time
 import json
-
-
-
-clients = []
+from . import clients
 
 # Create your views here.
 
 @accept_websocket
 def main_socket(request):
+    print("connect " + str(request))
+    print(request.COOKIES)
     if request.is_websocket:
         lock = threading.RLock()
         try:
@@ -30,6 +33,12 @@ def main_socket(request):
                     for element in Element.objects.filter(default=True):
                         s = serializers.serialize('json', [element])
                         request.websocket.send(f'discover_element {s}')
+
+                elif action == "get_element_data":
+                    pk = int(args[0])
+                    element = Element.objects.get(sequential_number=args[0])
+                    s = serializers.serialize('json', [element], fields=element.safe_fields)
+                    request.websocket.send(f'element_data {s}')
 
                 elif action == 'combine':
                     elements = []
@@ -49,17 +58,19 @@ def main_socket(request):
                         request.websocket.send(f"error Invalid number of elements: {len(elements)}")
                         continue
 
-                    recipes = set(elements[0].possible_recipes.all())
-                    for element in elements:
-                        recipes &= set(element.possible_recipes.all())
 
+
+                    
+                    recipes = list(Recipe.objects.filter(ingredients=','.join([str(i.sequential_number) for i in elements])))
+                    print(recipes)
                     if len(recipes) == 0:
                         # New element!
                         request.websocket.send(f"new_element " + ' '.join(args))
 
                     elif len(recipes) == 1:
                         # Already known element
-                        s = serializers.serialize('json', list(recipes))
+                        s = serializers.serialize('json', [list(recipes)[0].result])
+                        print(s)
                         request.websocket.send(f'discover_element {s}')
 
                     elif len(recipes) > 1:
@@ -70,19 +81,57 @@ def main_socket(request):
                 elif action == "new_element_suggestion":
                     d = json.loads(' '.join(args))
 
-                    d["ingredients"] = filter(lambda i: i, d["ingredients"])
+                    print(d)
 
-                    e = NewElementSuggestion.objects.create(**d["element"]["fields"])
-                    e.ingredients.set(d["ingredients"])
+                    d["ingredients"] = list(filter(lambda i: i, d["ingredients"]))
+                    d["ingredients"] = ','.join([i.split(",")[0] for i in d["ingredients"]])
+                    print(d["ingredients"])
+
+                    e = Suggestion.objects.create(**d["element"]["fields"], ingredients=d["ingredients"])
+                    e.save()
+
+                elif action == "combination_suggestion":
+                    d = json.loads(' '.join(args))
+
+                    print(d)
+
+                    d["ingredients"] = list(filter(lambda i: i, d["ingredients"]))
+
+                    d["backup_ingredients"] = d["ingredients"]
+
+                    del d["ingredients"]
+
+                    e = Suggestion.objects.create(name=d["name"])
+
+                    for idx, i in enumerate(d["backup_ingredients"]):
+                        e.ingredients.add(Element.objects.filter(password=i).first())
 
                     e.save()
-                    print(e)
 
                 elif action == "get_vote_pending":
                     sort = args[0]
 
                     if sort == "latest":
-                        for i in NewElementSuggestion.objects.order_by(F("create_date").asc()):
+                        for i in Suggestion.objects.order_by(F("create_date").desc()):
+                            s = serializers.serialize('json', [i])
+                            request.websocket.send(f"element_suggestion_vote {sort} {s}")
+
+                    elif sort == "oldest":
+                        for i in Suggestion.objects.order_by(F("create_date").asc()):
+                            s = serializers.serialize('json', [i])
+                            request.websocket.send(f"element_suggestion_vote {sort} {s}")
+
+                    elif sort == "verge":
+                        end = 10
+
+                        for i in Suggestion.objects.order_by(F("verge").desc()):
+                            s = serializers.serialize('json', [i])
+                            request.websocket.send(f"element_suggestion_vote {sort} {s}")
+
+                    elif sort == "undecided":
+                        end = 10
+
+                        for i in Suggestion.objects.order_by(F("verge").asc()):
                             s = serializers.serialize('json', [i])
                             request.websocket.send(f"element_suggestion_vote {sort} {s}")
 
@@ -95,21 +144,47 @@ def main_socket(request):
                     matches = [i.name for i in Element.objects.filter(name__contains=d)[0:20]]
 
                     request.websocket.send(f"element_autocomplete_list {json.dumps(matches)}")
+                elif action == "get_element_info":
+                    e_id = int(args[0])
+                    e_pwd = args[1]
 
+                    e = Element.objects.filter(sequential_number=e_id).first()
+
+                    if e is None:
+                        request.websocket.send(f'error Nonexistant element!')
+
+
+                    elif e.password == e_pwd:
+                        s = serializers.serialize('json', [e])
+                        request.websocket.send(f'discover_element {s}')
+
+                    else:
+                        request.websocket.send(f"error Wrong password!")
                 elif action == "upvote":
                     print("test")
-                    NewElementSuggestion.objects.filter(pk=int(args[0])).first().upvote()
+                    a = Suggestion.objects.filter(pk=int(args[0])).first()
+                    if not a:
+                        continue
+                    a.upvote(request.COOKIES.get("user_id"))
                     for i in clients:
-                        i.send("upvote " + args[0])
+                        i.send(f"set_vote {args[0]} {a.current}")
 
                 elif action == "downvote":
-                    NewElementSuggestion.objects.filter(pk=int(args[0])).first().downvote()
+                    a = Suggestion.objects.filter(pk=int(args[0])).first()
+                    if not a:
+                        continue
+                    a.downvote(request.COOKIES.get("user_id"))
                     for i in clients:
-                        i.send("downvote " + args[0])
+                        i.send(f"set_vote {args[0]} {a.current}")
                 print(action, args)
         finally:
             clients.remove(request.websocket)
             lock.release()
 
 def index(request):
-    return render(request, "index.html")
+    response = render(request, "index.html")
+
+    if not request.COOKIES.get("user_id"):
+        response.set_cookie("user_id", ''.join(random.choice(string.ascii_letters) for _ in range(40)) + str(time()))
+
+    return response

@@ -1,5 +1,7 @@
-$().ready(() => {
+Game.funcs.setup_tabs = function() {
+    console.log("Yes")
     $(".tab").each((idx, tab) => {
+        console.log(tab)
         let classes = tab.className.split(/\s+/)
         let tabname = classes.filter((v) => (v != "tab"))[0]
         $(".tab." + tabname)
@@ -13,7 +15,7 @@ $().ready(() => {
                 })
             )
     })
-})
+}
 
 Game.funcs.set_tab = (tabname) => {
     $(".tab").hide()

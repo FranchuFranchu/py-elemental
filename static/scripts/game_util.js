@@ -54,3 +54,34 @@ Game.funcs.is_dark = function(color) {
 
     return (num < parseInt("88", 16) * 3)
 }
+
+Game.funcs.get_interpolated_colors = function() {
+    var ingredients = Game.funcs.get_current_ingredients()
+    var colors = []
+    for (var i = 0; i < ingredients.length; i++) {
+        colors.push(Game.element_data[parseInt(ingredients[i].split(',')[0])].fields.bg_colors.split(',')[0])
+    }
+    
+    var reds = []
+    var greens = []
+    var blues = []
+
+    for (var i = 0; i < colors.length; i++) {
+        let color = colors[i]
+        reds.push(parseInt(color.slice(1, 3), 16))
+        greens.push(parseInt(color.slice(3, 5), 16))
+        blues.push(parseInt(color.slice(5, 7), 16))
+
+    }
+    console.log(colors)
+    var ravg = Math.floor(reds.reduce((a, b) => (a + b)) / reds.length)
+    var gavg = Math.floor(greens.reduce((a, b) => (a + b)) / greens.length)
+    var bavg = Math.floor(blues.reduce((a, b) => (a + b)) / blues.length)
+
+    console.log(ravg, gavg, bavg)
+
+    console.log(`rgba(${ravg},${gavg},${bavg},1)`)
+
+    return `rgba(${ravg},${gavg},${bavg},1)`
+
+}

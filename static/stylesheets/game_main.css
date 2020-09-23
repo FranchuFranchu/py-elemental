@@ -1,15 +1,23 @@
 
-html, body, main {
+html, body {
     height: 100%;
     width: 100%;
     margin: 0;
 }
+
+main {
+    height: 1fr;
+    width: 100%;
+    margin: 0;
+
+}
+
 .current-owned-elements { 
     overflow-y: scroll;
     height: 100%;
 }
 
-.element-creation-menu { 
+.element-creation-menu, .element-combination-warning { 
     position: fixed;
     top: 10%;
     left: 10%;
@@ -18,8 +26,34 @@ html, body, main {
     background-color: white;
     border: 1px solid black;
     border-radius: 5px;
-    display: grid;
     overflow-y: scroll;
+}
+
+.element-creation-menu {
+
+    display: grid;
+}
+
+.element-combination-warning button {
+    position: absolute;
+    bottom: 2%;
+}
+
+.element-combination-warning  button:nth-of-type(1) {
+    left: 2%;
+}
+
+.element-combination-warning button:nth-of-type(2) {
+    right: 2%;
+}
+
+.element-combination-warning h2 {
+    padding: 10px;
+    text-align: center;
+}
+.element-combination-warning p {
+    padding: 10px;
+    text-align: center;
 }
 
 .element-creation-container {
@@ -44,16 +78,21 @@ html, body, main {
     transform: translate(-50%,0%);
 }
 
-.vote-list-latest {
+.vote-list {
     display: grid;
     grid-template-columns: 1fr;
 }
 
 
-.vote-list-latest .vote-item {
+.vote-list .vote-item {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr 1fr;
+    grid-template-columns: 100px minmax(50px, 100%) 50px 100px 50px 50px 100px;
     align-items: center;
+}
+
+.vote-item .ingredients {
+    display: flex;
+    flex-direction: row;
 }
 
 .tab-list {
@@ -72,4 +111,25 @@ html, body, main {
 
 .tab-list > *:hover{
     background-color: grey;
+}
+
+.tab {
+    display: none;
+}
+
+.contextmenu {
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: none;
+    background-color: white;
+    border: 1px solid black;
+    grid-template-columns: 1fr;
+}
+
+.contextmenu > div {
+    padding: 3px;
+}
+.contextmenu > div:hover {
+    background-color: gray;
 }

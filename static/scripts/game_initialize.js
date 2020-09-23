@@ -26,5 +26,6 @@ window.Game = {
             fg_pattern: "NONE",
         } 
     },
+    element_data: {},
+    mobile: ('ontouchstart' in document.documentElement) || localStorage.debug_mobile
 }
-

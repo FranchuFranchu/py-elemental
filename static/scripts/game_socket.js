@@ -1,20 +1,39 @@
-Game.socket = new WebSocket("ws://localhost:8000/socket");
+Game.socket = new WebSocket("ws://" + window.location.host + "/socket");
 Game.prev_names
+    
 
 Game.socket.onopen = function(e) {
     Game.socket.send("get_default_elements")
-    Game.funcs.element_list_setup()
+    Game.funcs.suggestion_list_setup()
+    for (var i = 0; i < Object.keys(Game.known_elements).length; i++) {
+        let element_id = Object.keys(Game.known_elements)[i]
+        let element_pwd = Game.known_elements[element_id]
+        Game.socket.send("get_element_info " + element_id + " " + element_pwd)
+    }
 };
 
 Game.socket.onmessage = function(event) {
     console.debug(`[message] Data received from server: ${event.data}`);
+    console.log(event.data)
     action = event.data.split(' ')[0]
     args = event.data.limited_split(' ', 2)[1]
     if (action === "discover_element") {
         Game.funcs.add_element(JSON.parse(args)[0])
     }
     if (action === "new_element") {
-        Game.funcs.set_tab("element-suggestion")
+        Game.creation_reason = "create"
+        $(".bg-color-1")[0].jscolor.fromString(Game.funcs.get_interpolated_colors())
+        $(".bg-color-1")[0].jscolor.onInput()
+        $(".element-suggestion").show()
+    }
+    if (action === "element_data") {
+        let e = JSON.parse(args)[0]
+        let canvas = $(".canvas-draw-queue[data-pk=" + e.pk + "]")
+        canvas.removeClass("canvas-draw-queue")
+        canvas.each((idx, object) => {
+            Game.funcs.generate_element_canvas(object, e)
+
+        })
     }
     if (action === "element_suggestion_vote") {
         let order = event.data.limited_split(' ', 3)[1]
@@ -34,18 +53,14 @@ Game.socket.onmessage = function(event) {
             
     }
 
-    if (action === "upvote") {
+    if (action === "set_vote") {
         console.log(args)
-        let e = $(".vote-item[data-pk="+args+"] .current")
+        let e = $(".vote-item[data-pk="+args.split(' ')[0]+"] .current")
 
-        e.text(parseInt(e.text()) + 1)
+        e.text(parseInt(args.split(' ')[1]))
     }
-
-    if (action === "downvote") {
-        console.log(args)
-        let e = $(".vote-item[data-pk="+args+"] .current")
-
-        e.text(parseInt(e.text()) + -1)
+    if (action === "vote_accept" || action === "vote_reject") {
+        let e = $(".vote-item[data-pk="+args+"]").remove()
     }
 };
 

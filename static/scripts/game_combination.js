@@ -22,3 +22,6 @@ Game.funcs.get_current_ingredients = function () {
 
     return element_ids
 }
+Game.funcs.on_touch_end = function(event) {
+    alert("HI")
+}
