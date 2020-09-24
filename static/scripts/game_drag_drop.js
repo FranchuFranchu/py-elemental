@@ -4,6 +4,7 @@ Game.funcs.on_slot_drop = function(ev) {
 
     $(ev.target)
         .attr("data-password", Game.dragged.attributes["data-password"].nodeValue)
+
     Game.dragged = undefined
 }
 Game.funcs.on_dragover = function(ev) {
@@ -11,4 +12,6 @@ Game.funcs.on_dragover = function(ev) {
 }
 Game.funcs.on_slot_drag_start = function(ev) {
     Game.dragged = ev.target
+    
+    ev.dataTransfer.setData("text", ev.target.id);
 }

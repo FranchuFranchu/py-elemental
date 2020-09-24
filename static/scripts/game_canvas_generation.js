@@ -187,8 +187,8 @@ Game.funcs.add_element = function(element) {
 
     if (!Game.mobile) {
         canvas
-            .attr("draggable", true)
-            .on("dragstart", Game.funcs.on_slot_drag_start)
+            .attr("draggable", "true")
+            .attr("ondragstart", "Game.funcs.on_slot_drag_start(event)")
     } else {
         canvas
             .on("click", Game.funcs.on_element_touch)

@@ -117,7 +117,7 @@ class Suggestion(models.Model, IngredientMixin):
     bg_pattern = models.CharField(choices=BG_PATTERNS, default="FLAT", max_length=32, null=True)
 
     current = models.IntegerField(default=0)
-    target = models.IntegerField(default=1)
+    target = models.IntegerField(default=2)
     verge = models.IntegerField(default=1)
     create_date = models.DateTimeField()
 
