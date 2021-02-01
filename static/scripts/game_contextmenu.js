@@ -2,7 +2,6 @@ Game.funcs.on_element_contextmenu = (event) => {
     event.preventDefault()
 
     Game.contextmenu_pk = parseInt($(event.target).attr("data-pk"))
-    console.log("Hi")
     $("div.contextmenu")
         .css("display", "grid")
         .css("top", event.clientY)

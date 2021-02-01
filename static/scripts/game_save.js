@@ -8,3 +8,4 @@ Game.funcs.load_elements = function() {
         Game.known_elements = {}
     }
 }
+Game.funcs.load_elements()

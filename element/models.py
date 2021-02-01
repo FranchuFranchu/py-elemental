@@ -19,6 +19,15 @@ def color_validator(value):
             }
         )
 
+
+
+def name_validator(value):
+    
+    for i in value:
+        if ord(i) < ord(' '):
+            raise ValidationError('Value contains control character!')
+    
+
 def color_list_validator(value):
     colors = value.split(',')
     for color in colors:
@@ -67,11 +76,14 @@ class Recipe(models.Model, IngredientMixin):
         super().save(*args, **kwargs)
         return self
 
+    @classmethod
+    def result_of(cls, elements):
+        return cls.objects.filter(ingredients=','.join([str(i.sequential_number) for i in elements]))
 
 class Element(models.Model):
-    name = models.TextField(unique=True)
-    fg_colors = models.TextField(validators=[color_list_validator], null = True)
-    bg_colors = models.TextField(validators=[color_list_validator], null = True)
+    name = models.TextField(validators=[name_validator], unique=True)
+    fg_colors = models.TextField(validators=[color_list_validator], default = "#FFFFFF,#FFFFFF")
+    bg_colors = models.TextField(validators=[color_list_validator], default = "#FFFFFF,#FFFFFF")
     fg_pattern = models.CharField(choices=FG_PATTERNS, default="NONE", max_length=32)
     bg_pattern = models.CharField(choices=BG_PATTERNS, default="FLAT", max_length=32)
     default = models.BooleanField(default=False)
@@ -104,6 +116,10 @@ class Element(models.Model):
         super().save(*args, **kwargs)
         return self
 
+    @property
+    def discord_name(self):
+        return f'`{self.name}`'
+
     def __str__(self):
         return f'(#{self.sequential_number}) {self.name}'
 
@@ -111,13 +127,14 @@ class Suggestion(models.Model, IngredientMixin):
 
     ingredients = models.TextField()
     name = models.TextField()
-    fg_colors = models.TextField(validators=[color_list_validator], null = True)
-    bg_colors = models.TextField(validators=[color_list_validator], null = True)
-    fg_pattern = models.CharField(choices=FG_PATTERNS, default="NONE", max_length=32, null=True)
-    bg_pattern = models.CharField(choices=BG_PATTERNS, default="FLAT", max_length=32, null=True)
+    fg_colors = models.TextField(validators=[color_list_validator], default = "#FFFFFF,#FFFFFF")
+    bg_colors = models.TextField(validators=[color_list_validator], default = "#FFFFFF,#FFFFFF")
+    fg_pattern = models.CharField(choices=FG_PATTERNS, default="NONE", max_length=32)
+    bg_pattern = models.CharField(choices=BG_PATTERNS, default="FLAT", max_length=32)
 
+    edit_id = models.IntegerField(default=0)
     current = models.IntegerField(default=0)
-    target = models.IntegerField(default=2)
+    target = models.IntegerField(default=1)
     verge = models.IntegerField(default=1)
     create_date = models.DateTimeField()
 
@@ -126,6 +143,14 @@ class Suggestion(models.Model, IngredientMixin):
     voters = models.TextField(default='{"up":[],"down":[]}')
 
     voted_ips = models.TextField(default="")
+
+    EDITABLE_ATTRIBUTES = [
+        'name',
+        'fg_colors',
+        'bg_colors',
+        'fg_pattern',
+        'bg_pattern',
+    ]
 
     def set_voters(self, x):
         self.voters = json.dumps(x)
@@ -144,27 +169,35 @@ class Suggestion(models.Model, IngredientMixin):
     def result_accept(self):
         
         d = {k:v for k, v in self.__dict__.items()}
-        del d["voted_ips"]
-        del d["current"]
-        del d["_state"]
-        del d["id"]
-        del d["verge"]
-        del d["target"]
-        del d["voters"]
-        del d["ingredients"]
-        del d["suggestion_type"]
+        
+        valid_fields = [i.name for i in Element._meta.local_fields]
+        new_d = {}
+        for k, v in d.items():
+            if k in valid_fields:
+                new_d[k] = v
 
+        d = new_d
         for i in clients:
             i.send("vote_accept " + str(self.pk))
 
-        print(d)
+        e = Element.objects.filter(name=self.name).first()
 
-        if bool(self.bg_colors) or bool(self.fg_colors):
-            e = Element.objects.create(**d)
-            e.save()
+        if self.get_suggestion_type()== "new":
+            if bool(self.bg_colors) or bool(self.fg_colors):
+                e = Element.objects.create(**d)
+                e.save()
 
-        r = Recipe.objects.create(result=e, create_date=self.create_date, ingredients=self.ingredients)
+        if self.get_suggestion_type() in ("new", "combination"):
+            r = Recipe.objects.create(result=e, create_date=self.create_date, ingredients=self.ingredients)
+            r.save()
+        if self.get_suggestion_type() == "edit":
+            original = Element.objects.filter(sequential_number=self.edit_id).first()
+            for k in type(self).EDITABLE_ATTRIBUTES:
+                print(k)
+                setattr(original, k, getattr(self, k))
+            original.save()
 
+        print("deleteself")
         self.delete()
 
     def result_reject(self):

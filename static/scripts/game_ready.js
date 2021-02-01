@@ -17,7 +17,6 @@ $().ready(function() {
 
     }
 
-    Game.funcs.load_elements()
     Game.funcs.creation_setup()
     Game.funcs.contextmenu_setup()
     Game.funcs.suggestion_list_client_setup()

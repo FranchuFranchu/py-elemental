@@ -1,8 +1,8 @@
 Game.funcs.suggestion_list_setup = () => {
-    Game.socket.send("get_vote_pending latest")
-    Game.socket.send("get_vote_pending oldest")
-    Game.socket.send("get_vote_pending verge")
-    Game.socket.send("get_vote_pending undecided")
+    Game.socket.send_data("get_vote_pending", {"sort": "latest"})
+    Game.socket.send_data("get_vote_pending", {"sort": "oldest"})
+    Game.socket.send_data("get_vote_pending", {"sort": "verge"})
+    Game.socket.send_data("get_vote_pending", {"sort": "undecided"})
 
 
 }
@@ -17,7 +17,7 @@ Game.funcs.suggestion_list_client_setup = () => {
 
     $("button.refresh-button").on("click", (ev) => {
         $(".vote-list-" +$(".sorting-selection").val()).empty()
-        Game.socket.send("get_vote_pending " + $(".sorting-selection").val())
+        Game.socket.send_data("get_vote_pending", {"sort": $(".sorting-selection").val()})
     })
 }
 
@@ -41,7 +41,11 @@ Game.funcs.add_element_to_vote_list = function(order, element) {
 
     e.find(".voting-status .current").text(element.fields.current+element.fields.target)
     e.find(".voting-status .target").text(element.fields.target*2)
-        
+     
+    if (element.fields.ingredients === "") {
+        return;
+    }
+
     let ingredients = element.fields.ingredients.split(',')
     for (var i = 0; i < ingredients.length; i++) {
 
@@ -52,7 +56,7 @@ Game.funcs.add_element_to_vote_list = function(order, element) {
             // We don't know about this element yet, ask the server to send us the data
             c.attr("data-pk", pk)
             c.addClass("canvas-draw-queue")
-            Game.socket.send("get_element_data " + pk)
+            Game.socket.send_data("get_element_data", pk)
 
         } else {
             Game.funcs.generate_element_canvas(c[0], ingredient)

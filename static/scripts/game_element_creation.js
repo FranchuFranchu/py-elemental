@@ -40,7 +40,7 @@ Game.funcs.creation_setup = function() {
             l.push(e.value)
         })
         console.log(l, ev.target.value)
-        if (l.includes(ev.target.value)) {
+        if (l.includes(ev.target.value) && !(Game.creation_reason == "edit")) {
             $(".element-combination-warning").show()
         }
         $(".create-element-name").text($(".element-creation-menu .name").val())

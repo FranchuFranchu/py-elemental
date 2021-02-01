@@ -13,7 +13,7 @@
     <!-- ColorPicker -->
     <script type="text/javascript" src="/static/scripts/lib_color_picker.js"></script>
 
-    <!-- ColorPicker -->
+
     <script type="text/javascript" src="/static/scripts/lib_datalist.js"></script>
 
     <!-- Game scripts -->
@@ -25,10 +25,11 @@
     <script type="text/javascript" src="/static/scripts/game_contextmenu.js"></script>
     <script type="text/javascript" src="/static/scripts/game_drag_drop.js"></script>
     <script type="text/javascript" src="/static/scripts/game_element_creation.js"></script>
-    <script type="text/javascript" src="/static/scripts/game_suggestion_list.js"></script>
+    <script type="text/javascript" src="/static/scripts/game_message_handlers.js"></script>
     <script type="text/javascript" src="/static/scripts/game_ready.js"></script>
     <script type="text/javascript" src="/static/scripts/game_save.js"></script>
     <script type="text/javascript" src="/static/scripts/game_socket.js"></script>
+    <script type="text/javascript" src="/static/scripts/game_suggestion_list.js"></script>
     <script type="text/javascript" src="/static/scripts/game_tabs.js"></script>
     <link rel="stylesheet" type="text/css" href="/static/stylesheets/game_main.css">
 </head>
@@ -42,7 +43,7 @@
 
     <main>
         <div class="tab elements">
-            <div class="combine-menu" oncontextmenu="javascript:alert('success!');return false;">
+            <div class="combine-menu">
                 <h2>Combine</h2>
                 <canvas class="drop-slot"></canvas>
                 <canvas class="drop-slot"></canvas>
